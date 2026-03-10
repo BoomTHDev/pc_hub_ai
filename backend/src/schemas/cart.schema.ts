@@ -13,5 +13,9 @@ export const removeCartItemSchema = z.object({
   productId: z.string().min(1),
 });
 
+export const cartItemParamSchema = z.object({
+  productId: z.string().min(1),
+});
+
 export type AddToCartInput = z.infer<typeof addToCartSchema>;
 export type UpdateCartItemInput = z.infer<typeof updateCartItemSchema>;

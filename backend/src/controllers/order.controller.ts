@@ -3,9 +3,9 @@ import type { TypedHandler, IdParam } from "../lib/typed-request.js";
 import * as orderService from "../services/order.service.js";
 import type {
   CheckoutInput,
-  OrderQuery,
   UpdateOrderStatusInput,
 } from "../schemas/order.schema.js";
+import { orderQuerySchema } from "../schemas/order.schema.js";
 
 export const checkout: TypedHandler<
   Record<string, string>,
@@ -22,26 +22,20 @@ export const checkout: TypedHandler<
   }
 };
 
-export const findMyOrders: TypedHandler<
-  Record<string, string>,
-  unknown,
-  OrderQuery
-> = async (req, res, next) => {
+export const findMyOrders: TypedHandler = async (req, res, next) => {
   try {
-    const result = await orderService.findAll(req.query, req.user!.userId);
+    const query = orderQuerySchema.parse(req.query);
+    const result = await orderService.findAll(query, req.user!.userId);
     sendPaginated(res, result.orders, result.total, result.page, result.limit);
   } catch (e) {
     next(e);
   }
 };
 
-export const findAllOrders: TypedHandler<
-  Record<string, string>,
-  unknown,
-  OrderQuery
-> = async (req, res, next) => {
+export const findAllOrders: TypedHandler = async (req, res, next) => {
   try {
-    const result = await orderService.findAll(req.query);
+    const query = orderQuerySchema.parse(req.query);
+    const result = await orderService.findAll(query);
     sendPaginated(res, result.orders, result.total, result.page, result.limit);
   } catch (e) {
     next(e);

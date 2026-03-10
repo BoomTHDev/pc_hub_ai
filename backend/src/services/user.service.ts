@@ -5,7 +5,7 @@ import type {
   CreateAddressInput,
   UpdateAddressInput,
 } from "../schemas/user.schema.js";
-import type { AddressType } from "../generated/prisma/client.js";
+import type { UserRole } from "../generated/prisma/client.js";
 
 // Update user profile
 export async function updateProfile(userId: string, input: UpdateProfileInput) {
@@ -56,7 +56,7 @@ export async function createAddress(userId: string, input: CreateAddressInput) {
   return prisma.userAddress.create({
     data: {
       userId,
-      type: (input.type ?? "HOME") as AddressType,
+      type: input.type ?? "HOME",
       label: input.label ?? null,
       recipientName: input.recipientName,
       recipientPhone: input.recipientPhone,
@@ -98,9 +98,9 @@ export async function deleteAddress(userId: string, addressId: string) {
 }
 
 // Admin: list all users
-export async function findAllUsers(page = 1, limit = 20, role?: string) {
+export async function findAllUsers(page = 1, limit = 20, role?: UserRole) {
   const skip = (page - 1) * limit;
-  const where = role ? { role: role as "ADMIN" | "STAFF" | "CUSTOMER" } : {};
+  const where = role ? { role } : {};
 
   const [users, total] = await Promise.all([
     prisma.user.findMany({

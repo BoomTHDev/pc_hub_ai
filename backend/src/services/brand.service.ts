@@ -38,8 +38,7 @@ export async function update(id: string, input: UpdateBrandInput) {
 
 export async function remove(id: string) {
   const brand = await findById(id);
-  const productCount =
-    "_count" in brand ? (brand._count as { products: number }).products : 0;
+  const productCount = brand._count.products;
   if (productCount > 0) {
     throw errors.conflict(
       "Cannot delete brand with existing products. Remove products first.",

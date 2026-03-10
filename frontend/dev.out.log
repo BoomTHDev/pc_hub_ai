@@ -1,0 +1,35 @@
+[33m>[39m Building...
+[32m√[39m Building...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                      [2m | [22m [1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m                     [2m | [22m [36m36.34 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m                       [2m | [22m  [36m8.79 kB[39m[2m | [22m
+[32mchunk-HWO6H2J7.js[39m  [2m | [22m[2m-[22m                          [2m | [22m  [36m6.20 kB[39m[2m | [22m
+[32mchunk-ADISCQXH.js[39m  [2m | [22m[2m-[22m                          [2m | [22m  [36m4.87 kB[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m              [2m | [22m [1m56.19 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                      [2m | [22m [1mRaw size[22m
+[32mchunk-CVE6UMAD.js[39m  [2m | [22m[2mcustomer-routes[22m            [2m | [22m [36m76.05 kB[39m[2m | [22m
+[32mchunk-HJ7A4NSD.js[39m  [2m | [22m[2madmin-routes[22m               [2m | [22m [36m66.83 kB[39m[2m | [22m
+[32mchunk-WUHAHUCO.js[39m  [2m | [22m[2maccount-page-component[22m     [2m | [22m [36m32.67 kB[39m[2m | [22m
+[32mchunk-6Y7LKOVP.js[39m  [2m | [22m[2mproducts-page-component[22m    [2m | [22m [36m28.54 kB[39m[2m | [22m
+[32mchunk-RCNWVCJC.js[39m  [2m | [22m[2mpayments-page-component[22m    [2m | [22m [36m21.65 kB[39m[2m | [22m
+[32mchunk-74FTYWBU.js[39m  [2m | [22m[2mcart-page-component[22m        [2m | [22m [36m18.96 kB[39m[2m | [22m
+[32mchunk-TE33QPFV.js[39m  [2m | [22m[2morders-page-component[22m      [2m | [22m [36m17.79 kB[39m[2m | [22m
+[32mchunk-BROV6SRA.js[39m  [2m | [22m[2morder-detail-page-component[22m[2m | [22m [36m17.65 kB[39m[2m | [22m
+[32mchunk-TTWYODU5.js[39m  [2m | [22m[2mcheckout-page-component[22m    [2m | [22m [36m16.91 kB[39m[2m | [22m
+[32mchunk-LLBOBFYW.js[39m  [2m | [22m[2minventory-page-component[22m   [2m | [22m [36m16.49 kB[39m[2m | [22m
+[32mchunk-7OSYRAAT.js[39m  [2m | [22m[2morders-page-component[22m      [2m | [22m [36m11.98 kB[39m[2m | [22m
+[32mchunk-L4VVN2UC.js[39m  [2m | [22m[2m-[22m                          [2m | [22m  [36m3.44 kB[39m[2m | [22m
+[32mchunk-6W44AWMO.js[39m  [2m | [22m[2m-[22m                          [2m | [22m  [36m2.04 kB[39m[2m | [22m
+[32mchunk-MG3DF6PW.js[39m  [2m | [22m[2m-[22m                          [2m | [22m  [36m1.26 kB[39m[2m | [22m
+[32mchunk-QGCALJZ4.js[39m  [2m | [22m[2m-[22m                          [2m | [22m[36m504 bytes[39m[2m | [22m
+
+Application bundle generation complete. [5.807 seconds] - 2026-03-10T21:01:09.734Z
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m4200[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.56.1:[1m4200[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.1.107:[1m4200[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://172.28.208.1:[1m4200[22m/[39m

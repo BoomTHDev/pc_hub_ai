@@ -208,7 +208,7 @@ export async function createStaffUser(
       email: input.email,
       phone: input.phone ?? null,
       passwordHash,
-      role: input.role as UserRole,
+      role: input.role,
     },
   });
 

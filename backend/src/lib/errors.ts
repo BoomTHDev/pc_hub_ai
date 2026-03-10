@@ -44,4 +44,4 @@ export const errors = {
   internal(message = "Internal server error", code = "INTERNAL_ERROR") {
     return new AppError(message, 500, code, false);
   },
-} as const;
+};

@@ -1,19 +1,16 @@
-import { sendSuccess, sendPaginated } from "../lib/response.js";
+import { sendSuccess, sendPaginated, sendError } from "../lib/response.js";
 import type { TypedHandler, IdParam } from "../lib/typed-request.js";
 import * as paymentService from "../services/payment.service.js";
 import type {
   PaymentReviewInput,
-  PaymentQuery,
   MarkCodPaidInput,
 } from "../schemas/payment.schema.js";
+import { paymentQuerySchema } from "../schemas/payment.schema.js";
 
-export const findAll: TypedHandler<
-  Record<string, string>,
-  unknown,
-  PaymentQuery
-> = async (req, res, next) => {
+export const findAll: TypedHandler = async (req, res, next) => {
   try {
-    const result = await paymentService.findAll(req.query);
+    const query = paymentQuerySchema.parse(req.query);
+    const result = await paymentService.findAll(query);
     sendPaginated(
       res,
       result.payments,
@@ -37,12 +34,7 @@ export const findById: TypedHandler<IdParam> = async (req, res, next) => {
 export const uploadSlip: TypedHandler<IdParam> = async (req, res, next) => {
   try {
     if (!req.file) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          error: { code: "NO_FILE", message: "No file uploaded" },
-        });
+      sendError(res, 400, "NO_FILE", "No file uploaded");
       return;
     }
     sendSuccess(

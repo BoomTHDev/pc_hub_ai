@@ -4,6 +4,7 @@ import { requireStaff } from "../middlewares/role-guard.js";
 import { validate } from "../middlewares/validate.js";
 import {
   checkoutSchema,
+  orderIdParamSchema,
   orderQuerySchema,
   updateOrderStatusSchema,
 } from "../schemas/order.schema.js";
@@ -19,7 +20,12 @@ router.get(
   validate(orderQuerySchema, "query"),
   ctrl.findMyOrders,
 );
-router.get("/my/:id", authenticate, ctrl.findById);
+router.get(
+  "/my/:id",
+  authenticate,
+  validate(orderIdParamSchema, "params"),
+  ctrl.findById,
+);
 
 // Admin/Staff routes
 router.get(
@@ -29,11 +35,18 @@ router.get(
   validate(orderQuerySchema, "query"),
   ctrl.findAllOrders,
 );
-router.get("/:id", authenticate, requireStaff, ctrl.findByIdAdmin);
+router.get(
+  "/:id",
+  authenticate,
+  requireStaff,
+  validate(orderIdParamSchema, "params"),
+  ctrl.findByIdAdmin,
+);
 router.patch(
   "/:id/status",
   authenticate,
   requireStaff,
+  validate(orderIdParamSchema, "params"),
   validate(updateOrderStatusSchema),
   ctrl.updateStatus,
 );

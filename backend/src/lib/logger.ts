@@ -1,4 +1,5 @@
 import { env } from "../config/env.js";
+import type { JsonObject } from "./json.js";
 
 type LogLevel = "info" | "warn" | "error" | "debug";
 
@@ -7,7 +8,7 @@ interface LogEntry {
   message: string;
   timestamp: string;
   context?: string;
-  data?: Record<string, unknown>;
+  data?: JsonObject;
 }
 
 function formatLog(entry: LogEntry): string {
@@ -21,7 +22,7 @@ function createEntry(
   level: LogLevel,
   message: string,
   context?: string,
-  data?: Record<string, unknown>,
+  data?: JsonObject,
 ): LogEntry {
   return {
     level,
@@ -33,22 +34,22 @@ function createEntry(
 }
 
 export const logger = {
-  info(message: string, context?: string, data?: Record<string, unknown>) {
+  info(message: string, context?: string, data?: JsonObject) {
     const entry = createEntry("info", message, context, data);
     console.log(formatLog(entry));
   },
 
-  warn(message: string, context?: string, data?: Record<string, unknown>) {
+  warn(message: string, context?: string, data?: JsonObject) {
     const entry = createEntry("warn", message, context, data);
     console.warn(formatLog(entry));
   },
 
-  error(message: string, context?: string, data?: Record<string, unknown>) {
+  error(message: string, context?: string, data?: JsonObject) {
     const entry = createEntry("error", message, context, data);
     console.error(formatLog(entry));
   },
 
-  debug(message: string, context?: string, data?: Record<string, unknown>) {
+  debug(message: string, context?: string, data?: JsonObject) {
     if (env.NODE_ENV === "development") {
       const entry = createEntry("debug", message, context, data);
       console.debug(formatLog(entry));

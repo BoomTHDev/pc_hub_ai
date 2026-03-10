@@ -2,9 +2,8 @@ import type {
   Request,
   Response,
   NextFunction,
-  ParamsDictionary,
 } from "express";
-import type { ParsedQs } from "qs";
+import type { ParamsDictionary } from "express-serve-static-core";
 
 /**
  * Strongly-typed Express Request — eliminates `as Type` casts in controllers.
@@ -14,18 +13,18 @@ import type { ParsedQs } from "qs";
  * @template Q Query params type (e.g. `ProductQuery`)
  */
 export type TypedRequest<
-  P extends Record<string, string> = Record<string, string>,
-  B = unknown,
-  Q extends ParsedQs = ParsedQs,
-> = Request<P & ParamsDictionary, unknown, B, Q>;
+  P extends ParamsDictionary = ParamsDictionary,
+  B = object,
+  Q = object,
+> = Request<P, object, B, Q>;
 
 /**
  * Express handler with typed request.
  */
 export type TypedHandler<
-  P extends Record<string, string> = Record<string, string>,
-  B = unknown,
-  Q extends ParsedQs = ParsedQs,
+  P extends ParamsDictionary = ParamsDictionary,
+  B = object,
+  Q = object,
 > = (
   req: TypedRequest<P, B, Q>,
   res: Response,

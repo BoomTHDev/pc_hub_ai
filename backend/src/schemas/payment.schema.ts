@@ -33,3 +33,4 @@ export const markCodPaidSchema = z.object({
 export type PaymentReviewInput = z.infer<typeof paymentReviewSchema>;
 export type PaymentQuery = z.infer<typeof paymentQuerySchema>;
 export type MarkCodPaidInput = z.infer<typeof markCodPaidSchema>;
+export type PaymentIdParam = z.infer<typeof paymentIdParamSchema>;

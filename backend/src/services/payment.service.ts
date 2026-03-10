@@ -79,7 +79,13 @@ export async function uploadSlip(
 ) {
   const payment = await prisma.payment.findUnique({
     where: { id: paymentId },
-    include: { order: true },
+    include: {
+      order: true,
+      slips: {
+        select: { id: true },
+        take: 1,
+      },
+    },
   });
   if (!payment) throw errors.notFound("Payment not found");
   if (payment.order.userId !== userId) {
@@ -88,25 +94,39 @@ export async function uploadSlip(
   if (payment.method !== "PROMPTPAY_QR") {
     throw errors.badRequest("Slip upload is only for PromptPay payments");
   }
-  if (!["AWAITING_SLIP", "REJECTED"].includes(payment.status)) {
+  if (payment.status !== "AWAITING_SLIP") {
     throw errors.badRequest(
       "Payment is not in a state that accepts slip uploads",
     );
+  }
+  if (payment.slips.length > 0) {
+    throw errors.conflict("Payment slip already uploaded");
   }
 
   const uploaded = await uploadImage(fileBuffer, "slips");
 
   await prisma.$transaction(async (tx) => {
+    const claimResult = await tx.payment.updateMany({
+      where: { id: payment.id, status: "AWAITING_SLIP" },
+      data: { status: "WAITING_REVIEW" },
+    });
+    if (claimResult.count !== 1) {
+      throw errors.conflict("Payment slip already uploaded");
+    }
+
+    const existingSlip = await tx.paymentSlip.findFirst({
+      where: { paymentId: payment.id },
+      select: { id: true },
+    });
+    if (existingSlip) {
+      throw errors.conflict("Payment slip already uploaded");
+    }
+
     await tx.paymentSlip.create({
       data: {
         paymentId: payment.id,
         imageUrl: uploaded.secureUrl,
       },
-    });
-
-    await tx.payment.update({
-      where: { id: payment.id },
-      data: { status: "WAITING_REVIEW" },
     });
 
     await tx.purchaseOrder.update({

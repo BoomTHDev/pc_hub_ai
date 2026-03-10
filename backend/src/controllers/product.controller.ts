@@ -1,4 +1,4 @@
-import { sendSuccess, sendPaginated } from "../lib/response.js";
+import { sendSuccess, sendPaginated, sendError } from "../lib/response.js";
 import type {
   TypedHandler,
   IdParam,
@@ -8,17 +8,16 @@ import type {
 import * as productService from "../services/product.service.js";
 import type {
   CreateProductInput,
+  ProductImageUploadInput,
   UpdateProductInput,
-  ProductQuery,
+  UpdateProductAttributesInput,
 } from "../schemas/product.schema.js";
+import { productQuerySchema } from "../schemas/product.schema.js";
 
-export const findAll: TypedHandler<
-  Record<string, string>,
-  unknown,
-  ProductQuery
-> = async (req, res, next) => {
+export const findAll: TypedHandler = async (req, res, next) => {
   try {
-    const result = await productService.findAll(req.query);
+    const query = productQuerySchema.parse(req.query);
+    const result = await productService.findAll(query);
     sendPaginated(
       res,
       result.products,
@@ -79,19 +78,14 @@ export const remove: TypedHandler<IdParam> = async (req, res, next) => {
   }
 };
 
-export const addImage: TypedHandler<IdParam, { isPrimary?: string }> = async (
+export const addImage: TypedHandler<IdParam, ProductImageUploadInput> = async (
   req,
   res,
   next,
 ) => {
   try {
     if (!req.file) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          error: { code: "NO_FILE", message: "No file uploaded" },
-        });
+      sendError(res, 400, "NO_FILE", "No file uploaded");
       return;
     }
     const isPrimary = req.body.isPrimary === "true";
@@ -120,7 +114,7 @@ export const removeImage: TypedHandler<ImageIdParam> = async (
 
 export const updateAttributes: TypedHandler<
   IdParam,
-  { attributes: Array<{ name: string; value: string }> }
+  UpdateProductAttributesInput
 > = async (req, res, next) => {
   try {
     sendSuccess(

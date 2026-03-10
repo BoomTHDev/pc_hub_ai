@@ -1,11 +1,21 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter } from '@angular/router';
-
-import { routes } from './app.routes';
+import {
+  ApplicationConfig,
+  provideBrowserGlobalErrorListeners,
+} from "@angular/core";
+import { provideHttpClient, withInterceptors } from "@angular/common/http";
+import { provideRouter, withInMemoryScrolling } from "@angular/router";
+import { authInterceptor } from "./core/interceptors/auth.interceptor";
+import { routes } from "./app.routes";
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes)
-  ]
+    provideHttpClient(withInterceptors([authInterceptor])),
+    provideRouter(
+      routes,
+      withInMemoryScrolling({
+        scrollPositionRestoration: "enabled",
+      }),
+    ),
+  ],
 };

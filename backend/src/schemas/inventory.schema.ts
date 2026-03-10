@@ -29,7 +29,12 @@ export const inventoryQuerySchema = z.object({
     .optional(),
 });
 
+export const lowStockQuerySchema = z.object({
+  threshold: z.coerce.number().int().positive().max(1000).default(10),
+});
+
 export type CreateInventoryTransactionInput = z.infer<
   typeof createInventoryTransactionSchema
 >;
 export type InventoryQuery = z.infer<typeof inventoryQuerySchema>;
+export type LowStockQuery = z.infer<typeof lowStockQuerySchema>;

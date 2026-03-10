@@ -1,9 +1,12 @@
 import { sendSuccess, sendPaginated } from "../lib/response.js";
-import type { TypedHandler, IdParam } from "../lib/typed-request.js";
+import type { TypedHandler } from "../lib/typed-request.js";
 import * as inventoryService from "../services/inventory.service.js";
 import type {
   CreateInventoryTransactionInput,
-  InventoryQuery,
+} from "../schemas/inventory.schema.js";
+import {
+  inventoryQuerySchema,
+  lowStockQuerySchema,
 } from "../schemas/inventory.schema.js";
 
 export const createTransaction: TypedHandler<
@@ -17,13 +20,10 @@ export const createTransaction: TypedHandler<
   }
 };
 
-export const findAll: TypedHandler<
-  Record<string, string>,
-  unknown,
-  InventoryQuery
-> = async (req, res, next) => {
+export const findAll: TypedHandler = async (req, res, next) => {
   try {
-    const result = await inventoryService.findAll(req.query);
+    const query = inventoryQuerySchema.parse(req.query);
+    const result = await inventoryService.findAll(query);
     sendPaginated(
       res,
       result.transactions,
@@ -38,14 +38,14 @@ export const findAll: TypedHandler<
 
 export const getLowStock: TypedHandler<
   Record<string, string>,
-  unknown,
-  { threshold?: string }
+  object
 > = async (req, res, next) => {
   try {
-    const threshold = req.query.threshold
-      ? parseInt(req.query.threshold, 10)
-      : 10;
-    sendSuccess(res, await inventoryService.getLowStockProducts(threshold));
+    const query = lowStockQuerySchema.parse(req.query);
+    sendSuccess(
+      res,
+      await inventoryService.getLowStockProducts(query.threshold),
+    );
   } catch (e) {
     next(e);
   }

@@ -40,10 +40,7 @@ export async function update(id: string, input: UpdateCategoryInput) {
 
 export async function remove(id: string) {
   const category = await findById(id);
-  const productCount =
-    "_count" in category
-      ? (category._count as { products: number }).products
-      : 0;
+  const productCount = category._count.products;
   if (productCount > 0) {
     throw errors.conflict(
       "Cannot delete category with existing products. Remove products first.",
