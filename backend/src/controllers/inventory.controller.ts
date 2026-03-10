@@ -1,37 +1,29 @@
-import type { Request, Response, NextFunction } from "express";
 import { sendSuccess, sendPaginated } from "../lib/response.js";
+import type { TypedHandler, IdParam } from "../lib/typed-request.js";
 import * as inventoryService from "../services/inventory.service.js";
 import type {
   CreateInventoryTransactionInput,
   InventoryQuery,
 } from "../schemas/inventory.schema.js";
 
-export async function createTransaction(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const createTransaction: TypedHandler<
+  Record<string, string>,
+  CreateInventoryTransactionInput
+> = async (req, res, next) => {
   try {
-    sendSuccess(
-      res,
-      await inventoryService.createTransaction(
-        req.body as CreateInventoryTransactionInput,
-      ),
-      201,
-    );
+    sendSuccess(res, await inventoryService.createTransaction(req.body), 201);
   } catch (e) {
     next(e);
   }
-}
+};
 
-export async function findAll(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const findAll: TypedHandler<
+  Record<string, string>,
+  unknown,
+  InventoryQuery
+> = async (req, res, next) => {
   try {
-    const query = req.query as unknown as InventoryQuery;
-    const result = await inventoryService.findAll(query);
+    const result = await inventoryService.findAll(req.query);
     sendPaginated(
       res,
       result.transactions,
@@ -42,19 +34,19 @@ export async function findAll(
   } catch (e) {
     next(e);
   }
-}
+};
 
-export async function getLowStock(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const getLowStock: TypedHandler<
+  Record<string, string>,
+  unknown,
+  { threshold?: string }
+> = async (req, res, next) => {
   try {
     const threshold = req.query.threshold
-      ? parseInt(req.query.threshold as string, 10)
+      ? parseInt(req.query.threshold, 10)
       : 10;
     sendSuccess(res, await inventoryService.getLowStockProducts(threshold));
   } catch (e) {
     next(e);
   }
-}
+};

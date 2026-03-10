@@ -1,5 +1,5 @@
-import type { Request, Response, NextFunction } from "express";
 import { sendSuccess, sendPaginated } from "../lib/response.js";
+import type { TypedHandler, IdParam } from "../lib/typed-request.js";
 import * as paymentService from "../services/payment.service.js";
 import type {
   PaymentReviewInput,
@@ -7,14 +7,13 @@ import type {
   MarkCodPaidInput,
 } from "../schemas/payment.schema.js";
 
-export async function findAll(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const findAll: TypedHandler<
+  Record<string, string>,
+  unknown,
+  PaymentQuery
+> = async (req, res, next) => {
   try {
-    const query = req.query as unknown as PaymentQuery;
-    const result = await paymentService.findAll(query);
+    const result = await paymentService.findAll(req.query);
     sendPaginated(
       res,
       result.payments,
@@ -25,25 +24,17 @@ export async function findAll(
   } catch (e) {
     next(e);
   }
-}
+};
 
-export async function findById(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const findById: TypedHandler<IdParam> = async (req, res, next) => {
   try {
-    sendSuccess(res, await paymentService.findById(req.params.id as string));
+    sendSuccess(res, await paymentService.findById(req.params.id));
   } catch (e) {
     next(e);
   }
-}
+};
 
-export async function uploadSlip(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const uploadSlip: TypedHandler<IdParam> = async (req, res, next) => {
   try {
     if (!req.file) {
       res
@@ -54,48 +45,53 @@ export async function uploadSlip(
         });
       return;
     }
-    const result = await paymentService.uploadSlip(
-      req.params.id as string,
-      req.user!.userId,
-      req.file.buffer,
+    sendSuccess(
+      res,
+      await paymentService.uploadSlip(
+        req.params.id,
+        req.user!.userId,
+        req.file.buffer,
+      ),
     );
-    sendSuccess(res, result);
   } catch (e) {
     next(e);
   }
-}
+};
 
-export async function reviewPayment(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const reviewPayment: TypedHandler<IdParam, PaymentReviewInput> = async (
+  req,
+  res,
+  next,
+) => {
   try {
-    const result = await paymentService.reviewPayment(
-      req.params.id as string,
-      req.user!.userId,
-      req.body as PaymentReviewInput,
+    sendSuccess(
+      res,
+      await paymentService.reviewPayment(
+        req.params.id,
+        req.user!.userId,
+        req.body,
+      ),
     );
-    sendSuccess(res, result);
   } catch (e) {
     next(e);
   }
-}
+};
 
-export async function markCodPaid(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const markCodPaid: TypedHandler<IdParam, MarkCodPaidInput> = async (
+  req,
+  res,
+  next,
+) => {
   try {
-    const { note } = req.body as MarkCodPaidInput;
-    const result = await paymentService.markCodPaid(
-      req.params.id as string,
-      req.user!.userId,
-      note,
+    sendSuccess(
+      res,
+      await paymentService.markCodPaid(
+        req.params.id,
+        req.user!.userId,
+        req.body.note,
+      ),
     );
-    sendSuccess(res, result);
   } catch (e) {
     next(e);
   }
-}
+};

@@ -1,5 +1,10 @@
-import type { Request, Response, NextFunction } from "express";
 import { sendSuccess, sendPaginated } from "../lib/response.js";
+import type {
+  TypedHandler,
+  IdParam,
+  SlugParam,
+  ImageIdParam,
+} from "../lib/typed-request.js";
 import * as productService from "../services/product.service.js";
 import type {
   CreateProductInput,
@@ -7,14 +12,13 @@ import type {
   ProductQuery,
 } from "../schemas/product.schema.js";
 
-export async function findAll(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const findAll: TypedHandler<
+  Record<string, string>,
+  unknown,
+  ProductQuery
+> = async (req, res, next) => {
   try {
-    const query = req.query as unknown as ProductQuery;
-    const result = await productService.findAll(query);
+    const result = await productService.findAll(req.query);
     sendPaginated(
       res,
       result.products,
@@ -25,87 +29,61 @@ export async function findAll(
   } catch (e) {
     next(e);
   }
-}
+};
 
-export async function findById(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const findById: TypedHandler<IdParam> = async (req, res, next) => {
   try {
-    sendSuccess(res, await productService.findById(req.params.id as string));
+    sendSuccess(res, await productService.findById(req.params.id));
   } catch (e) {
     next(e);
   }
-}
+};
 
-export async function findBySlug(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const findBySlug: TypedHandler<SlugParam> = async (req, res, next) => {
   try {
-    sendSuccess(
-      res,
-      await productService.findBySlug(req.params.slug as string),
-    );
+    sendSuccess(res, await productService.findBySlug(req.params.slug));
   } catch (e) {
     next(e);
   }
-}
+};
 
-export async function create(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const create: TypedHandler<
+  Record<string, string>,
+  CreateProductInput
+> = async (req, res, next) => {
   try {
-    sendSuccess(
-      res,
-      await productService.create(req.body as CreateProductInput),
-      201,
-    );
+    sendSuccess(res, await productService.create(req.body), 201);
   } catch (e) {
     next(e);
   }
-}
+};
 
-export async function update(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const update: TypedHandler<IdParam, UpdateProductInput> = async (
+  req,
+  res,
+  next,
+) => {
   try {
-    sendSuccess(
-      res,
-      await productService.update(
-        req.params.id as string,
-        req.body as UpdateProductInput,
-      ),
-    );
+    sendSuccess(res, await productService.update(req.params.id, req.body));
   } catch (e) {
     next(e);
   }
-}
+};
 
-export async function remove(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const remove: TypedHandler<IdParam> = async (req, res, next) => {
   try {
-    await productService.remove(req.params.id as string);
+    await productService.remove(req.params.id);
     sendSuccess(res, { message: "Product deleted" });
   } catch (e) {
     next(e);
   }
-}
+};
 
-export async function addImage(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const addImage: TypedHandler<IdParam, { isPrimary?: string }> = async (
+  req,
+  res,
+  next,
+) => {
   try {
     if (!req.file) {
       res
@@ -119,52 +97,37 @@ export async function addImage(
     const isPrimary = req.body.isPrimary === "true";
     sendSuccess(
       res,
-      await productService.addImage(
-        req.params.id as string,
-        req.file.buffer,
-        isPrimary,
-      ),
+      await productService.addImage(req.params.id, req.file.buffer, isPrimary),
       201,
     );
   } catch (e) {
     next(e);
   }
-}
+};
 
-export async function removeImage(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const removeImage: TypedHandler<ImageIdParam> = async (
+  req,
+  res,
+  next,
+) => {
   try {
-    await productService.removeImage(
-      req.params.id as string,
-      req.params.imageId as string,
-    );
+    await productService.removeImage(req.params.id, req.params.imageId);
     sendSuccess(res, { message: "Image deleted" });
   } catch (e) {
     next(e);
   }
-}
+};
 
-export async function updateAttributes(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const updateAttributes: TypedHandler<
+  IdParam,
+  { attributes: Array<{ name: string; value: string }> }
+> = async (req, res, next) => {
   try {
-    const attributes = req.body.attributes as Array<{
-      name: string;
-      value: string;
-    }>;
     sendSuccess(
       res,
-      await productService.updateAttributes(
-        req.params.id as string,
-        attributes,
-      ),
+      await productService.updateAttributes(req.params.id, req.body.attributes),
     );
   } catch (e) {
     next(e);
   }
-}
+};

@@ -1,77 +1,56 @@
-import type { Request, Response, NextFunction } from "express";
 import { sendSuccess } from "../lib/response.js";
+import type { TypedHandler, IdParam } from "../lib/typed-request.js";
 import * as categoryService from "../services/category.service.js";
 import type {
   CreateCategoryInput,
   UpdateCategoryInput,
 } from "../schemas/category.schema.js";
+import type { NextFunction, Request, Response } from "express";
 
-export async function findAll(
-  _req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const findAll: TypedHandler = async (_req, res, next) => {
   try {
     sendSuccess(res, await categoryService.findAll());
   } catch (e) {
     next(e);
   }
-}
+};
 
-export async function findById(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const findById: TypedHandler<IdParam> = async (req, res, next) => {
   try {
-    sendSuccess(res, await categoryService.findById(req.params.id as string));
+    sendSuccess(res, await categoryService.findById(req.params.id));
   } catch (e) {
     next(e);
   }
-}
+};
 
-export async function create(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const create: TypedHandler<
+  Record<string, string>,
+  CreateCategoryInput
+> = async (req, res, next) => {
   try {
-    const result = await categoryService.create(
-      req.body as CreateCategoryInput,
-    );
-    sendSuccess(res, result, 201);
+    sendSuccess(res, await categoryService.create(req.body), 201);
   } catch (e) {
     next(e);
   }
-}
+};
 
-export async function update(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const update: TypedHandler<IdParam, UpdateCategoryInput> = async (
+  req,
+  res,
+  next,
+) => {
   try {
-    sendSuccess(
-      res,
-      await categoryService.update(
-        req.params.id as string,
-        req.body as UpdateCategoryInput,
-      ),
-    );
+    sendSuccess(res, await categoryService.update(req.params.id, req.body));
   } catch (e) {
     next(e);
   }
-}
+};
 
-export async function remove(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const remove: TypedHandler<IdParam> = async (req, res, next) => {
   try {
-    await categoryService.remove(req.params.id as string);
+    await categoryService.remove(req.params.id);
     sendSuccess(res, { message: "Category deleted" });
   } catch (e) {
     next(e);
   }
-}
+};

@@ -1,5 +1,5 @@
-import type { Request, Response, NextFunction } from "express";
 import { sendSuccess } from "../lib/response.js";
+import type { TypedHandler } from "../lib/typed-request.js";
 import * as authService from "../services/auth.service.js";
 import type {
   RegisterInput,
@@ -9,115 +9,88 @@ import type {
   CreateStaffInput,
 } from "../schemas/auth.schema.js";
 
-export async function register(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const register: TypedHandler<
+  Record<string, string>,
+  RegisterInput
+> = async (req, res, next) => {
   try {
-    const input = req.body as RegisterInput;
-    const result = await authService.register(input);
-    sendSuccess(res, result, 201);
-  } catch (error) {
-    next(error);
+    sendSuccess(res, await authService.register(req.body), 201);
+  } catch (e) {
+    next(e);
   }
-}
+};
 
-export async function login(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const login: TypedHandler<Record<string, string>, LoginInput> = async (
+  req,
+  res,
+  next,
+) => {
   try {
-    const input = req.body as LoginInput;
-    const result = await authService.login(input);
-    sendSuccess(res, result);
-  } catch (error) {
-    next(error);
+    sendSuccess(res, await authService.login(req.body));
+  } catch (e) {
+    next(e);
   }
-}
+};
 
-export async function refreshToken(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const refreshToken: TypedHandler<
+  Record<string, string>,
+  RefreshTokenInput
+> = async (req, res, next) => {
   try {
-    const { refreshToken } = req.body as RefreshTokenInput;
-    const tokens = await authService.refresh(refreshToken);
-    sendSuccess(res, tokens);
-  } catch (error) {
-    next(error);
+    sendSuccess(res, await authService.refresh(req.body.refreshToken));
+  } catch (e) {
+    next(e);
   }
-}
+};
 
-export async function logout(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const logout: TypedHandler<
+  Record<string, string>,
+  RefreshTokenInput
+> = async (req, res, next) => {
   try {
-    const { refreshToken } = req.body as RefreshTokenInput;
-    await authService.logout(refreshToken);
+    await authService.logout(req.body.refreshToken);
     sendSuccess(res, { message: "Logged out successfully" });
-  } catch (error) {
-    next(error);
+  } catch (e) {
+    next(e);
   }
-}
+};
 
-export async function logoutAll(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const logoutAll: TypedHandler = async (req, res, next) => {
   try {
-    const userId = req.user!.userId;
-    await authService.logoutAll(userId);
+    await authService.logoutAll(req.user!.userId);
     sendSuccess(res, { message: "Logged out from all devices" });
-  } catch (error) {
-    next(error);
+  } catch (e) {
+    next(e);
   }
-}
+};
 
-export async function changePassword(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const changePassword: TypedHandler<
+  Record<string, string>,
+  ChangePasswordInput
+> = async (req, res, next) => {
   try {
-    const userId = req.user!.userId;
-    const input = req.body as ChangePasswordInput;
-    await authService.changePassword(userId, input);
+    await authService.changePassword(req.user!.userId, req.body);
     sendSuccess(res, { message: "Password changed successfully" });
-  } catch (error) {
-    next(error);
+  } catch (e) {
+    next(e);
   }
-}
+};
 
-export async function getProfile(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const getProfile: TypedHandler = async (req, res, next) => {
   try {
-    const userId = req.user!.userId;
-    const profile = await authService.getProfile(userId);
-    sendSuccess(res, profile);
-  } catch (error) {
-    next(error);
+    sendSuccess(res, await authService.getProfile(req.user!.userId));
+  } catch (e) {
+    next(e);
   }
-}
+};
 
-export async function createStaffUser(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export const createStaffUser: TypedHandler<
+  Record<string, string>,
+  CreateStaffInput
+> = async (req, res, next) => {
   try {
-    const input = req.body as CreateStaffInput;
-    const user = await authService.createStaffUser(input);
-    sendSuccess(res, user, 201);
-  } catch (error) {
-    next(error);
+    sendSuccess(res, await authService.createStaffUser(req.body), 201);
+  } catch (e) {
+    next(e);
   }
-}
+};
