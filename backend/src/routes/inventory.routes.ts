@@ -5,6 +5,7 @@ import { validate } from "../middlewares/validate.js";
 import {
   createInventoryTransactionSchema,
   inventoryQuerySchema,
+  lowStockQuerySchema,
 } from "../schemas/inventory.schema.js";
 import * as ctrl from "../controllers/inventory.controller.js";
 
@@ -14,7 +15,7 @@ const router = Router();
 router.use(authenticate, requireStaff);
 
 router.get("/", validate(inventoryQuerySchema, "query"), ctrl.findAll);
-router.get("/low-stock", ctrl.getLowStock);
+router.get("/low-stock", validate(lowStockQuerySchema, "query"), ctrl.getLowStock);
 router.post(
   "/",
   validate(createInventoryTransactionSchema),

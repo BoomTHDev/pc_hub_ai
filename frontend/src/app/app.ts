@@ -1,12 +1,19 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject } from "@angular/core";
+import { RouterOutlet } from "@angular/router";
+import { AuthService } from "./core/services/auth.service";
+import { ToastStackComponent } from "./shared/toast-stack.component";
 
 @Component({
-  selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  selector: "app-root",
+  standalone: true,
+  imports: [RouterOutlet, ToastStackComponent],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
 export class App {
-  protected readonly title = signal('frontend');
+  private readonly auth = inject(AuthService);
+
+  constructor() {
+    void this.auth.initialize();
+  }
 }

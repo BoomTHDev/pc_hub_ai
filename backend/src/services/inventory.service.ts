@@ -30,7 +30,7 @@ export async function createTransaction(
   });
   if (!product) throw errors.notFound("Product not found");
 
-  const type = input.type as InventoryTransactionType;
+  const type: InventoryTransactionType = input.type;
 
   // Determine stock change direction
   let stockChange: number;

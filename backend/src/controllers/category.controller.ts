@@ -5,7 +5,6 @@ import type {
   CreateCategoryInput,
   UpdateCategoryInput,
 } from "../schemas/category.schema.js";
-import type { NextFunction, Request, Response } from "express";
 
 export const findAll: TypedHandler = async (_req, res, next) => {
   try {

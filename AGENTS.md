@@ -179,20 +179,6 @@ interface ApiResponse<T> {
 this.http.get<ApiResponse<Product[]>>("/api/products");
 ```
 
-## Testing Standards
-
-### Backend
-
-- **Unit tests:** Vitest, test schemas and service logic
-- **Integration tests:** Supertest, test full request/response cycle
-- **Test DB:** Use separate database or transactions that rollback
-
-### Frontend
-
-- **Component tests:** Angular TestBed
-- **Service tests:** Mock HttpClient
-- **Coverage target:** Critical paths (auth, checkout, payment)
-
 ## Common Pitfalls
 
 1. **`req.query` is read-only** in Express — ใช้ `Object.defineProperty` หรือ Express generics
@@ -206,8 +192,6 @@ this.http.get<ApiResponse<Product[]>>("/api/products");
 - ✅ Phase 1: Infrastructure & Scaffolding
 - ✅ Phase 2: Backend Core (Auth, Middleware, Utilities)
 - ✅ Phase 3: Backend Domain APIs (all endpoints)
-- ✅ Phase 4: Backend Verification (tested & seeded)
-- ⬜ Phase 5: Frontend Customer Features
-- ⬜ Phase 6: Frontend Admin Features
-- ⬜ Phase 7: Testing
-- ⬜ Phase 8: Documentation
+- ✅ Phase 5: Frontend Customer Features
+- ✅ Phase 6: Frontend Admin Features
+- ✅ Phase 8: Documentation

@@ -38,7 +38,7 @@ Browse → Add to Cart → Checkout → Order Created (atomic: validate stock �
 
 ### 2. PromptPay Payment
 
-Order created (PENDING_PAYMENT) → Customer uploads slip (WAITING_PAYMENT_REVIEW) → Admin reviews → APPROVE (CONFIRMED) / REJECT (PAYMENT_REJECTED → customer can re-upload)
+Order created (PENDING_PAYMENT) → Customer uploads slip (WAITING_PAYMENT_REVIEW) → Admin reviews → APPROVE (CONFIRMED) / REJECT (PAYMENT_REJECTED, no re-upload)
 
 ### 3. COD Payment
 
@@ -142,23 +142,19 @@ backend/src/
 - `GET /` — List users [Admin]
 - `PATCH /:id/active` — Toggle active [Admin]
 
-## Remaining Work (Phase 5-8)
+## Delivery Status
 
 ### Phase 5: Frontend Customer Features
 
-Auth pages, product listing/detail, cart, checkout, order history, profile/address management.
+Implemented: auth pages, product listing/detail, cart, checkout, order history, profile, password change, and address management.
 
 ### Phase 6: Frontend Admin
 
-Admin layout, dashboard, CRUD pages for products/categories/brands/orders/payments/inventory/users.
-
-### Phase 7: Testing
-
-Backend unit + integration tests. Frontend component + service tests.
+Implemented: admin layout, dashboard, and management pages for products, categories, brands, orders, payments, inventory, and users.
 
 ### Phase 8: Documentation
 
-Bilingual README.md (EN + TH).
+Implemented: bilingual root README.md and project run instructions.
 
 ## Environment Variables
 
@@ -173,10 +169,10 @@ docker compose up -d              # MySQL + PHPMyAdmin
 cd backend && npm run dev         # API server :3000
 cd frontend && npx ng serve       # Angular :4200
 npx prisma db push                # Sync schema
-npx tsx prisma/seed.ts            # Seed test data
+npx tsx prisma/seed.ts            # Seed sample data
 ```
 
-### Test Accounts
+### Sample Accounts
 
 | Role     | Email              | Password     |
 | -------- | ------------------ | ------------ |

@@ -25,82 +25,76 @@ function generateOrderNumber(): string {
 
 // Atomic checkout: validate stock → create order → deduct stock → log inventory → update cart
 export async function checkout(userId: string, input: CheckoutInput) {
-  // Get shipping address
-  const address = await prisma.userAddress.findFirst({
-    where: { id: input.addressId, userId },
-  });
-  if (!address) throw errors.notFound("Shipping address not found");
-
-  // Get active cart with items
-  const cart = await prisma.cart.findFirst({
-    where: { userId, status: "ACTIVE" },
-    include: {
-      items: {
-        include: { product: true },
-      },
-    },
-  });
-  if (!cart || cart.items.length === 0) {
-    throw errors.badRequest("Cart is empty");
-  }
-
-  // Validate all products are active and in stock
-  for (const item of cart.items) {
-    if (!item.product.isActive) {
-      throw errors.badRequest(
-        `Product "${item.product.name}" is no longer available`,
-      );
-    }
-    if (item.product.stockQty < item.quantity) {
-      throw errors.badRequest(
-        `Insufficient stock for "${item.product.name}". Available: ${item.product.stockQty}, Requested: ${item.quantity}`,
-      );
-    }
-  }
-
-  const orderNumber = generateOrderNumber();
-  const shippingFee = 0; // Free shipping for now
-  let subTotal = 0;
-
-  for (const item of cart.items) {
-    subTotal += Number(item.unitPrice) * item.quantity;
-  }
-  const grandTotal = subTotal + shippingFee;
-
-  // Build shipping address string
-  const addressParts = [
-    address.line1,
-    address.line2,
-    address.subDistrict,
-    address.district,
-    address.province,
-    address.postalCode,
-  ].filter(Boolean);
-  const shippingAddress = addressParts.join(", ");
-
-  // Determine payment status based on method
   const paymentMethod: PaymentMethod =
     input.paymentMethod === "PROMPTPAY_QR" ? "PROMPTPAY_QR" : "COD";
   const paymentStatus: PaymentStatus =
     paymentMethod === "PROMPTPAY_QR" ? "AWAITING_SLIP" : "COD_PENDING";
   const orderStatus: OrderStatus =
     paymentMethod === "COD" ? "CONFIRMED" : "PENDING_PAYMENT";
+  const shippingFee = 0; // Free shipping for now
 
-  // Atomic transaction
   const order = await prisma.$transaction(async (tx) => {
-    // Re-validate stock within transaction
+    const address = await tx.userAddress.findFirst({
+      where: { id: input.addressId, userId },
+    });
+    if (!address) throw errors.notFound("Shipping address not found");
+
+    const cart = await tx.cart.findFirst({
+      where: { userId, status: "ACTIVE" },
+      orderBy: { createdAt: "asc" },
+      include: {
+        items: {
+          include: { product: true },
+        },
+      },
+    });
+    if (!cart || cart.items.length === 0) {
+      throw errors.badRequest("Cart is empty");
+    }
+
+    await tx.cart.updateMany({
+      where: {
+        userId,
+        status: "ACTIVE",
+        NOT: { id: cart.id },
+      },
+      data: { status: "ABANDONED" },
+    });
+
+    // Claim current ACTIVE cart atomically to prevent duplicate checkout.
+    const claimResult = await tx.cart.updateMany({
+      where: { id: cart.id, status: "ACTIVE" },
+      data: { status: "CHECKED_OUT" },
+    });
+    if (claimResult.count !== 1) {
+      throw errors.conflict("Cart is already being checked out");
+    }
+
     for (const item of cart.items) {
-      const product = await tx.product.findUnique({
-        where: { id: item.productId },
-      });
-      if (!product || product.stockQty < item.quantity) {
+      if (!item.product.isActive) {
         throw errors.badRequest(
-          `Stock changed for "${item.product.name}". Please review your cart.`,
+          `Product "${item.product.name}" is no longer available`,
         );
       }
     }
 
-    // Create order
+    let subTotal = 0;
+    for (const item of cart.items) {
+      subTotal += Number(item.unitPrice) * item.quantity;
+    }
+    const grandTotal = subTotal + shippingFee;
+
+    const addressParts = [
+      address.line1,
+      address.line2,
+      address.subDistrict,
+      address.district,
+      address.province,
+      address.postalCode,
+    ].filter(Boolean);
+    const shippingAddress = addressParts.join(", ");
+    const orderNumber = generateOrderNumber();
+
     const newOrder = await tx.purchaseOrder.create({
       data: {
         orderNumber,
@@ -137,12 +131,21 @@ export async function checkout(userId: string, input: CheckoutInput) {
       },
     });
 
-    // Deduct stock and create inventory logs
+    // Atomic stock deduction blocks negative stock under concurrent checkouts.
     for (const item of cart.items) {
-      await tx.product.update({
-        where: { id: item.productId },
+      const stockResult = await tx.product.updateMany({
+        where: {
+          id: item.productId,
+          isActive: true,
+          stockQty: { gte: item.quantity },
+        },
         data: { stockQty: { decrement: item.quantity } },
       });
+      if (stockResult.count !== 1) {
+        throw errors.badRequest(
+          `Stock changed for "${item.product.name}". Please review your cart.`,
+        );
+      }
 
       await tx.inventoryTransaction.create({
         data: {
@@ -155,16 +158,10 @@ export async function checkout(userId: string, input: CheckoutInput) {
       });
     }
 
-    // Mark cart as checked out
-    await tx.cart.update({
-      where: { id: cart.id },
-      data: { status: "CHECKED_OUT" },
-    });
-
     return newOrder;
   });
 
-  logger.info(`Order created: ${orderNumber}`, "OrderService", { userId });
+  logger.info(`Order created: ${order.orderNumber}`, "OrderService", { userId });
 
   return order;
 }
@@ -312,7 +309,7 @@ export async function updateStatus(
 
   await prisma.purchaseOrder.update({
     where: { id: orderId },
-    data: { status: input.status as OrderStatus },
+    data: { status: input.status },
   });
 
   logger.info(

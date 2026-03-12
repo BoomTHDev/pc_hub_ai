@@ -1,8 +1,18 @@
 import type { Request, Response, NextFunction } from "express";
 import { AppError } from "../lib/errors.js";
+import type { JsonObject } from "../lib/json.js";
 import { sendError } from "../lib/response.js";
 import { logger } from "../lib/logger.js";
 import { env } from "../config/env.js";
+
+interface ErrorWithCode extends Error {
+  code: string;
+  meta?: JsonObject;
+}
+
+function hasCode(error: Error): error is ErrorWithCode {
+  return "code" in error && typeof error.code === "string";
+}
 
 // Centralized error handling middleware
 export function errorHandler(
@@ -28,12 +38,8 @@ export function errorHandler(
   }
 
   // Handle Prisma known request errors
-  if (err.constructor.name === "PrismaClientKnownRequestError") {
-    const prismaError = err as Error & {
-      code: string;
-      meta?: Record<string, unknown>;
-    };
-    if (prismaError.code === "P2002") {
+  if (err.constructor.name === "PrismaClientKnownRequestError" && hasCode(err)) {
+    if (err.code === "P2002") {
       sendError(
         res,
         409,
@@ -42,16 +48,15 @@ export function errorHandler(
       );
       return;
     }
-    if (prismaError.code === "P2025") {
+    if (err.code === "P2025") {
       sendError(res, 404, "NOT_FOUND", "Record not found");
       return;
     }
   }
 
   // Handle multer errors
-  if (err.constructor.name === "MulterError") {
-    const multerError = err as Error & { code: string };
-    if (multerError.code === "LIMIT_FILE_SIZE") {
+  if (err.constructor.name === "MulterError" && hasCode(err)) {
+    if (err.code === "LIMIT_FILE_SIZE") {
       sendError(res, 400, "FILE_TOO_LARGE", "File size exceeds the limit");
       return;
     }
@@ -63,7 +68,9 @@ export function errorHandler(
   logger.error(
     `Unhandled error: ${err.message}`,
     "ErrorHandler",
-    env.NODE_ENV === "development" ? { stack: err.stack } : undefined,
+    env.NODE_ENV === "development" && err.stack
+      ? { stack: err.stack }
+      : undefined,
   );
 
   sendError(

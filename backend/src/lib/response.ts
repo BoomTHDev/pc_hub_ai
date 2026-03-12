@@ -1,10 +1,11 @@
 import type { Response } from "express";
+import type { JsonObject, JsonValue } from "./json.js";
 
 // Standardized API response envelope
 interface SuccessResponse<T> {
   success: true;
   data: T;
-  meta?: Record<string, unknown>;
+  meta?: JsonObject;
 }
 
 interface ErrorResponse {
@@ -12,7 +13,7 @@ interface ErrorResponse {
   error: {
     code: string;
     message: string;
-    details?: unknown;
+    details?: JsonValue;
   };
 }
 
@@ -23,7 +24,7 @@ export function sendSuccess<T>(
   res: Response,
   data: T,
   statusCode = 200,
-  meta?: Record<string, unknown>,
+  meta?: JsonObject,
 ): void {
   const response: SuccessResponse<T> = { success: true, data };
   if (meta) {
@@ -56,7 +57,7 @@ export function sendError(
   statusCode: number,
   code: string,
   message: string,
-  details?: unknown,
+  details?: JsonValue,
 ): void {
   const response: ErrorResponse = {
     success: false,

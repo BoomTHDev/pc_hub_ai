@@ -40,3 +40,4 @@ export const updateOrderStatusSchema = z.object({
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
 export type OrderQuery = z.infer<typeof orderQuerySchema>;
 export type UpdateOrderStatusInput = z.infer<typeof updateOrderStatusSchema>;
+export type OrderIdParam = z.infer<typeof orderIdParamSchema>;

@@ -4,8 +4,10 @@ import * as userService from "../services/user.service.js";
 import type {
   UpdateProfileInput,
   CreateAddressInput,
+  ToggleUserActiveInput,
   UpdateAddressInput,
 } from "../schemas/user.schema.js";
+import { userListQuerySchema } from "../schemas/user.schema.js";
 
 // Profile
 export const updateProfile: TypedHandler<
@@ -88,14 +90,15 @@ export const deleteAddress: TypedHandler<IdParam> = async (req, res, next) => {
 // Admin: user management
 export const findAllUsers: TypedHandler<
   Record<string, string>,
-  unknown,
-  { page?: string; limit?: string; role?: string }
+  object
 > = async (req, res, next) => {
   try {
-    const page = req.query.page ? parseInt(req.query.page, 10) : 1;
-    const limit = req.query.limit ? parseInt(req.query.limit, 10) : 20;
-    const role = req.query.role;
-    const result = await userService.findAllUsers(page, limit, role);
+    const query = userListQuerySchema.parse(req.query);
+    const result = await userService.findAllUsers(
+      query.page,
+      query.limit,
+      query.role,
+    );
     sendPaginated(res, result.users, result.total, result.page, result.limit);
   } catch (e) {
     next(e);
@@ -104,7 +107,7 @@ export const findAllUsers: TypedHandler<
 
 export const toggleUserActive: TypedHandler<
   IdParam,
-  { isActive: boolean }
+  ToggleUserActiveInput
 > = async (req, res, next) => {
   try {
     sendSuccess(

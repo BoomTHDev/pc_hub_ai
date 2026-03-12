@@ -38,6 +38,22 @@ export const addressIdParamSchema = z.object({
   id: z.string().min(1),
 });
 
+export const userIdParamSchema = z.object({
+  id: z.string().min(1),
+});
+
+export const userListQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(100).default(20),
+  role: z.enum(["ADMIN", "STAFF", "CUSTOMER"]).optional(),
+});
+
+export const toggleUserActiveSchema = z.object({
+  isActive: z.boolean(),
+});
+
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type CreateAddressInput = z.infer<typeof createAddressSchema>;
 export type UpdateAddressInput = z.infer<typeof updateAddressSchema>;
+export type UserListQuery = z.infer<typeof userListQuerySchema>;
+export type ToggleUserActiveInput = z.infer<typeof toggleUserActiveSchema>;

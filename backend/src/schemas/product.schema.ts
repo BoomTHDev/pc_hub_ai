@@ -48,6 +48,28 @@ export const productSlugParamSchema = z.object({
   slug: z.string().min(1),
 });
 
+export const productImageUploadSchema = z.object({
+  isPrimary: z.enum(["true", "false"]).optional(),
+});
+
+export const productImageParamSchema = z.object({
+  id: z.string().min(1),
+  imageId: z.string().min(1),
+});
+
+export const updateProductAttributesSchema = z.object({
+  attributes: z.array(
+    z.object({
+      name: z.string().min(1),
+      value: z.string().min(1),
+    }),
+  ),
+});
+
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;
 export type ProductQuery = z.infer<typeof productQuerySchema>;
+export type ProductImageUploadInput = z.infer<typeof productImageUploadSchema>;
+export type UpdateProductAttributesInput = z.infer<
+  typeof updateProductAttributesSchema
+>;
